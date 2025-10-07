@@ -9,6 +9,57 @@
     <!-- Carga de Iconos (Lucide Icons) -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    <!-- Firebase Imports -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, collection, onSnapshot, query, addDoc, updateDoc, deleteDoc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global variables provided by the Canvas environment
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        if (Object.keys(firebaseConfig).length > 0) {
+            const app = initializeApp(firebaseConfig);
+            window.db = getFirestore(app);
+            window.auth = getAuth(app);
+        
+            // Authentication and Firestore setup
+            onAuthStateChanged(window.auth, async (user) => {
+                if (user) {
+                    window.userId = user.uid;
+                } else {
+                    // Sign in with custom token if available, otherwise anonymously
+                    try {
+                        if (initialAuthToken) {
+                            await signInWithCustomToken(window.auth, initialAuthToken);
+                            window.userId = window.auth.currentUser.uid;
+                        } else {
+                            await signInAnonymously(window.auth);
+                            window.userId = window.auth.currentUser.uid;
+                        }
+                    } catch (error) {
+                        console.error("Firebase Auth Error:", error);
+                        // Fallback to a random ID if authentication fails completely
+                        window.userId = crypto.randomUUID();
+                    }
+                }
+                // Once authenticated, initialize data listeners
+                if (window.db && window.userId) {
+                    window.isAuthReady = true;
+                    // Initialize listeners for products
+                    window.initAppListeners();
+                    console.log("Firestore ready. User ID:", window.userId);
+                    // Show the user ID for collaborative debugging
+                    document.getElementById('user-id-display').textContent = `ID Usuario: ${window.userId}`;
+                }
+            });
+        } else {
+             console.warn("Firebase configuration not found. Running in local simulation mode.");
+        }
+    </script>
+    
     <style>
         /* Estilos personalizados para el toque profesional */
         :root {
@@ -31,24 +82,7 @@
             min-height: 80vh;
         }
 
-        /* Animación para interacción de palabras/imágenes */
-        .product-card:hover .card-overlay {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* Estilo para animación de notificación */
-        @keyframes ping-once {
-            0% { transform: scale(1); opacity: 0.7; }
-            50% { transform: scale(1.2); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-
-        .animate-ping-once {
-            animation: ping-once 0.5s ease-out;
-        }
-        
-        /* Estilos para el botón de carga del LLM */
+        /* Estilo para el botón de carga del LLM */
         .loading-button {
             background-color: #f1f1f1;
             color: #5D4037;
@@ -60,6 +94,22 @@
             0% { opacity: 1; }
             50% { opacity: 0.5; }
             100% { opacity: 1; }
+        }
+
+        /* Animaciones */
+        @keyframes ping-once {
+            0% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.2); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .animate-ping-once {
+            animation: ping-once 0.5s ease-out;
+        }
+
+        /* Estilo para el panel de administración */
+        #admin-panel {
+            background-color: #fcfcfc;
         }
     </style>
 </head>
@@ -75,9 +125,45 @@
                 <a href="#cotizar" class="text-gray-600 hover:text-primary transition duration-300">
                     <button class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90 transition duration-300 shadow-lg">Cotizar Ahora</button>
                 </a>
+                <!-- Botón de Administración -->
+                <button onclick="toggleAdminPanel()" class="px-3 py-1 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition duration-300 text-sm font-medium">Admin</button>
             </div>
         </nav>
     </header>
+    
+    <!-- User ID Display for Debugging -->
+    <div id="user-id-display" class="bg-primary text-white text-xs p-1 text-center font-mono opacity-80">
+        Cargando ID...
+    </div>
+
+    <!-- Panel de Administración (CMS) - Oculto por defecto -->
+    <section id="admin-panel" class="hidden container mx-auto px-4 sm:px-6 lg:px-8 py-10 border-b-4 border-accent">
+        <h2 class="text-3xl font-bold text-primary mb-6">Panel de Administración de Productos</h2>
+        
+        <!-- Formulario para Añadir/Editar Producto -->
+        <div class="bg-white p-6 rounded-xl shadow-lg mb-8">
+            <h3 class="text-xl font-semibold text-primary mb-4" id="admin-form-title">Añadir Nuevo Producto</h3>
+            <form id="product-form" onsubmit="handleProductSubmit(event)">
+                <input type="hidden" id="product-id">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input type="text" id="product-name" placeholder="Nombre del Producto" required class="p-3 border rounded-lg focus:ring-primary focus:border-primary">
+                    <input type="number" id="product-price" placeholder="Precio (COP)" required min="0" class="p-3 border rounded-lg focus:ring-primary focus:border-primary">
+                </div>
+                <textarea id="product-description" rows="3" placeholder="Descripción breve del producto" required class="mt-4 p-3 w-full border rounded-lg focus:ring-primary focus:border-primary"></textarea>
+                <input type="text" id="product-image" placeholder="URL Imagen (placehold.co)" value="https://placehold.co/400x300/A1887F/FFFFFF?text=NEW+ITEM" required class="mt-4 p-3 w-full border rounded-lg focus:ring-primary focus:border-primary">
+                <div class="flex justify-end mt-4 space-x-3">
+                    <button type="button" onclick="resetProductForm()" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition duration-300">Cancelar/Nuevo</button>
+                    <button type="submit" class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-opacity-80 transition duration-300" id="form-submit-button">Añadir Producto</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Lista de Productos Administrables -->
+        <h3 class="text-xl font-semibold text-primary mb-4">Productos en Venta (Base de Datos)</h3>
+        <div id="admin-product-list" class="space-y-4">
+            <p class="text-gray-500">Cargando productos...</p>
+        </div>
+    </section>
 
     <!-- Hero Section con Interacción de Palabras e Imágenes (Simulada) -->
     <section id="hero-section" class="relative flex items-center justify-center text-center text-white p-8">
@@ -174,62 +260,12 @@
         </div>
     </section>
 
-    <!-- Comprar (Sección de E-commerce Simulado) -->
+    <!-- Comprar (Sección de E-commerce con productos dinámicos de Firestore) -->
     <section id="comprar" class="container mx-auto px-4 sm:px-6 lg:px-8 py-16 bg-gray-100 rounded-xl my-12">
         <h2 class="text-4xl font-bold text-center text-primary mb-12">Comprar Productos Destacados</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-
-            <!-- Producto 1 -->
-            <div class="product-card bg-white rounded-xl shadow-lg hover:shadow-2xl transition duration-500 overflow-hidden relative">
-                <img src="https://placehold.co/400x300/A1887F/FFFFFF?text=Sof%C3%A1+Modular" alt="Sofá Modular de Lujo" class="w-full h-48 object-cover">
-                <div class="p-4">
-                    <h3 class="font-bold text-primary">Sofá Modular "Ébano"</h3>
-                    <p class="text-gray-500 text-sm">Tapicería de terciopelo.</p>
-                    <p class="text-2xl font-semibold text-accent mt-2">$2.500.000 COP</p>
-                    <button onclick="addToCart('Sofá Ébano', 2500000)" class="w-full mt-3 py-2 bg-primary text-white rounded-lg text-sm hover:bg-opacity-80 transition duration-300 flex items-center justify-center">
-                        <i data-lucide="shopping-cart" class="w-4 h-4 mr-2"></i> Añadir al Carrito
-                    </button>
-                </div>
-            </div>
-
-            <!-- Producto 2 -->
-            <div class="product-card bg-white rounded-xl shadow-lg hover:shadow-2xl transition duration-500 overflow-hidden relative">
-                <img src="https://placehold.co/400x300/8D6E63/FFFFFF?text=Mesa+Comedor" alt="Mesa de Comedor Redonda" class="w-full h-48 object-cover">
-                <div class="p-4">
-                    <h3 class="font-bold text-primary">Mesa de Comedor "Castaño"</h3>
-                    <p class="text-gray-500 text-sm">Madera maciza de 6 puestos.</p>
-                    <p class="text-2xl font-semibold text-accent mt-2">$1.800.000 COP</p>
-                    <button onclick="addToCart('Mesa Castaño', 1800000)" class="w-full mt-3 py-2 bg-primary text-white rounded-lg text-sm hover:bg-opacity-80 transition duration-300 flex items-center justify-center">
-                        <i data-lucide="shopping-cart" class="w-4 h-4 mr-2"></i> Añadir al Carrito
-                    </button>
-                </div>
-            </div>
-
-            <!-- Producto 3 -->
-            <div class="product-card bg-white rounded-xl shadow-lg hover:shadow-2xl transition duration-500 overflow-hidden relative">
-                <img src="https://placehold.co/400x300/6D4C41/FFFFFF?text=Cama+Queen" alt="Cama Queen Size" class="w-full h-48 object-cover">
-                <div class="p-4">
-                    <h3 class="font-bold text-primary">Cama Queen "Majestad"</h3>
-                    <p class="text-gray-500 text-sm">Cabecero tapizado y estructura reforzada.</p>
-                    <p class="text-2xl font-semibold text-accent mt-2">$3.200.000 COP</p>
-                    <button onclick="addToCart('Cama Majestad', 3200000)" class="w-full mt-3 py-2 bg-primary text-white rounded-lg text-sm hover:bg-opacity-80 transition duration-300 flex items-center justify-center">
-                        <i data-lucide="shopping-cart" class="w-4 h-4 mr-2"></i> Añadir al Carrito
-                    </button>
-                </div>
-            </div>
-
-            <!-- Producto 4 -->
-            <div class="product-card bg-white rounded-xl shadow-lg hover:shadow-2xl transition duration-500 overflow-hidden relative">
-                <img src="https://placehold.co/400x300/4E342E/FFFFFF?text=Silla+Auxiliar" alt="Silla Auxiliar de Diseño" class="w-full h-48 object-cover">
-                <div class="p-4">
-                    <h3 class="font-bold text-primary">Silla Auxiliar "Versalles"</h3>
-                    <p class="text-gray-500 text-sm">Detalles en oro y madera.</p>
-                    <p class="text-2xl font-semibold text-accent mt-2">$450.000 COP</p>
-                    <button onclick="addToCart('Silla Versalles', 450000)" class="w-full mt-3 py-2 bg-primary text-white rounded-lg text-sm hover:bg-opacity-80 transition duration-300 flex items-center justify-center">
-                        <i data-lucide="shopping-cart" class="w-4 h-4 mr-2"></i> Añadir al Carrito
-                    </button>
-                </div>
-            </div>
+        <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <p class="text-center text-gray-500 col-span-full" id="loading-products">Cargando productos dinámicos...</p>
+            <!-- Productos cargados desde Firestore se insertarán aquí -->
         </div>
 
         <!-- Carrito de Compras (Botón Flotante) -->
@@ -368,13 +404,190 @@
         const LLM_MODEL = 'gemini-2.5-flash-preview-05-20';
         const TTS_MODEL = 'gemini-2.5-flash-preview-tts';
 
+        // Variables globales de la aplicación
+        let cart = [];
+        let allProducts = []; // Para almacenar productos cargados desde Firestore
+        let currentEditingProduct = null;
+
         // Inicializa los iconos de Lucide
         document.addEventListener('DOMContentLoaded', (event) => {
             lucide.createIcons();
-            // Llama a resetHero para asegurar que los valores iniciales son correctos
             resetHero();
         });
 
+        // Configuración de Firestore Listeners
+        window.initAppListeners = function() {
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+            const productsCollectionPath = `/artifacts/${appId}/public/data/products`;
+            const productsCollection = collection(window.db, productsCollectionPath);
+
+            // Listener para PRODUCTOS (público)
+            onSnapshot(productsCollection, (snapshot) => {
+                allProducts = [];
+                snapshot.forEach((doc) => {
+                    allProducts.push({ id: doc.id, ...doc.data() });
+                });
+                console.log("Productos actualizados:", allProducts.length);
+                renderProducts(allProducts);
+                renderAdminProducts(allProducts);
+            }, (error) => {
+                console.error("Error al cargar productos desde Firestore:", error);
+                document.getElementById('loading-products').textContent = 'Error al cargar productos. Por favor, revisa la consola.';
+            });
+        }
+        
+        // --- FUNCIONES DE ADMINISTRACIÓN (CRUD) ---
+
+        function toggleAdminPanel() {
+            const panel = document.getElementById('admin-panel');
+            panel.classList.toggle('hidden');
+        }
+
+        function resetProductForm() {
+            document.getElementById('product-form').reset();
+            document.getElementById('product-id').value = '';
+            document.getElementById('admin-form-title').textContent = 'Añadir Nuevo Producto';
+            document.getElementById('form-submit-button').textContent = 'Añadir Producto';
+            currentEditingProduct = null;
+        }
+
+        function editProduct(product) {
+            document.getElementById('product-id').value = product.id;
+            document.getElementById('product-name').value = product.name;
+            document.getElementById('product-price').value = product.price;
+            document.getElementById('product-description').value = product.description;
+            document.getElementById('product-image').value = product.image;
+
+            document.getElementById('admin-form-title').textContent = `Editar: ${product.name}`;
+            document.getElementById('form-submit-button').textContent = 'Guardar Cambios';
+            currentEditingProduct = product;
+            document.getElementById('admin-panel').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        async function deleteProduct(id, name) {
+             const confirmation = confirm(`¿Estás seguro de que quieres eliminar el producto "${name}"?`);
+             if (!confirmation) return;
+
+             try {
+                const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+                const productDocRef = doc(window.db, `/artifacts/${appId}/public/data/products`, id);
+                await deleteDoc(productDocRef);
+                showNotification(`Producto "${name}" eliminado con éxito.`, 'bg-red-600');
+             } catch (error) {
+                console.error("Error al eliminar el producto:", error);
+                showNotification('Error al eliminar el producto.', 'bg-red-600');
+             }
+        }
+
+
+        async function handleProductSubmit(event) {
+            event.preventDefault();
+            const form = event.target;
+            const id = form['product-id'].value;
+            
+            const productData = {
+                name: form['product-name'].value,
+                price: parseFloat(form['product-price'].value),
+                description: form['product-description'].value,
+                image: form['product-image'].value,
+                timestamp: serverTimestamp()
+            };
+
+            try {
+                const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+                const productsCollectionRef = collection(window.db, `/artifacts/${appId}/public/data/products`);
+
+                if (id) {
+                    // EDITAR producto
+                    const productDocRef = doc(window.db, `/artifacts/${appId}/public/data/products`, id);
+                    await updateDoc(productDocRef, productData);
+                    showNotification(`Producto "${productData.name}" actualizado con éxito.`, 'bg-green-600');
+                } else {
+                    // AÑADIR producto
+                    await addDoc(productsCollectionRef, productData);
+                    showNotification(`Producto "${productData.name}" añadido con éxito.`, 'bg-green-600');
+                }
+
+                resetProductForm(); // Limpiar formulario
+                
+            } catch (error) {
+                console.error("Error al guardar el producto:", error);
+                showNotification('Error al guardar el producto. Revisa la consola.', 'bg-red-600');
+            }
+        }
+
+        function renderAdminProducts(products) {
+            const adminList = document.getElementById('admin-product-list');
+            adminList.innerHTML = '';
+
+            if (products.length === 0) {
+                adminList.innerHTML = '<p class="text-gray-500">No hay productos en la base de datos.</p>';
+                return;
+            }
+
+            products.forEach(product => {
+                const item = document.createElement('div');
+                item.className = 'flex justify-between items-center p-4 bg-white border border-gray-200 rounded-lg shadow-sm';
+                
+                item.innerHTML = `
+                    <div class="flex items-center space-x-4">
+                        <img src="${product.image}" onerror="this.onerror=null;this.src='https://placehold.co/50x50/F0F0F0/000000?text=IMG';" class="w-12 h-12 object-cover rounded">
+                        <div>
+                            <p class="font-semibold text-primary">${product.name}</p>
+                            <p class="text-sm text-gray-500">${formatCurrency(product.price)}</p>
+                        </div>
+                    </div>
+                    <div class="space-x-2">
+                        <button onclick='editProduct(${JSON.stringify(product)})' class="p-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition">
+                            <i data-lucide="edit-2" class="w-4 h-4"></i>
+                        </button>
+                        <button onclick='deleteProduct("${product.id}", "${product.name}")' class="p-2 bg-red-500 text-white rounded hover:bg-red-600 transition">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                `;
+                adminList.appendChild(item);
+            });
+            lucide.createIcons(); // Re-renderizar iconos
+        }
+
+        // --- FUNCIONES DE VISTA PÚBLICA ---
+
+        function renderProducts(products) {
+            const productGrid = document.getElementById('product-grid');
+            productGrid.innerHTML = ''; // Limpiar la cuadrícula
+
+            if (products.length === 0) {
+                productGrid.innerHTML = '<p class="text-center text-gray-500 col-span-full">Aún no hay productos en la tienda. Revisa el Panel de Administración.</p>';
+                return;
+            }
+
+            products.forEach(product => {
+                const productCard = document.createElement('div');
+                productCard.className = 'product-card bg-white rounded-xl shadow-lg hover:shadow-2xl transition duration-500 overflow-hidden relative';
+                
+                // Usamos la URL de la imagen de Firestore (o un fallback si falla)
+                const imageUrl = product.image || 'https://placehold.co/400x300/F0F0F0/000000?text=NO+IMAGE';
+
+                productCard.innerHTML = `
+                    <img src="${imageUrl}" onerror="this.onerror=null;this.src='https://placehold.co/400x300/F0F0F0/000000?text=IMG+ERROR';" alt="${product.name}" class="w-full h-48 object-cover">
+                    <div class="p-4">
+                        <h3 class="font-bold text-primary">${product.name}</h3>
+                        <p class="text-gray-500 text-sm h-10 overflow-hidden">${product.description}</p>
+                        <p class="text-2xl font-semibold text-accent mt-2">${formatCurrency(product.price)}</p>
+                        <button onclick="addToCart('${product.name}', ${product.price})" 
+                                class="w-full mt-3 py-2 bg-primary text-white rounded-lg text-sm hover:bg-opacity-80 transition duration-300 flex items-center justify-center">
+                            <i data-lucide="shopping-cart" class="w-4 h-4 mr-2"></i> Añadir al Carrito
+                        </button>
+                    </div>
+                `;
+                productGrid.appendChild(productCard);
+            });
+            lucide.createIcons();
+        }
+
+        // --- LÓGICA TTS y LLM (Generador de Ideas) ---
+        
         /*
         * Utilidades API y Manejo de Errores
         */
@@ -601,8 +814,9 @@
             }
         }
         // --- Fin Funciones Auxiliares ---
-        
-        
+
+        // --- LÓGICA DE VISTA / FRONT-END ---
+
         /*
         * Lógica para la Interacción de Palabras con Imágenes (Hero Section)
         */
@@ -613,7 +827,6 @@
             heroTitle.innerHTML = `<span class="text-accent">${title}:</span> ${heroTitle.innerHTML.split(':')[1] || 'Elegancia en Cada Mueble.'}`;
             heroSubtitle.textContent = subtitle;
             
-            // Efecto visual: Se podría cambiar el fondo si tuviéramos múltiples imágenes.
             const heroSection = document.getElementById('hero-section');
             heroSection.style.backgroundImage = `url('https://placehold.co/1920x800/4E342E/FFFFFF/webp?text=Mobiliario+de+${title}')`;
         }
@@ -664,8 +877,6 @@
         /*
         * Lógica de Carrito de Compras (E-commerce Simulado)
         */
-        let cart = [];
-
         function formatCurrency(amount) {
             return new Intl.NumberFormat('es-CO', {
                 style: 'currency',
@@ -680,7 +891,6 @@
             const cartCountElement = document.getElementById('cart-count');
             const emptyMessage = document.getElementById('empty-cart-message');
 
-            // FIX: Se añade verificación para asegurar que los elementos existen antes de manipularlos
             if (!cartList || !cartTotalElement || !cartCountElement || !emptyMessage) {
                 console.error("Error al cargar elementos del carrito. Intentando de nuevo...");
                 return; 
@@ -716,21 +926,19 @@
 
             cartTotalElement.textContent = formatCurrency(total);
             cartCountElement.textContent = cart.length;
-            lucide.createIcons(); // Vuelve a renderizar iconos en el modal
+            lucide.createIcons();
         }
 
         function addToCart(name, price) {
             cart.push({ name, price });
             updateCartUI();
             
-            // Pequeña animación para indicar que se añadió
             const cartButton = document.getElementById('cart-button').querySelector('button');
             cartButton.classList.add('animate-ping-once');
             setTimeout(() => {
                 cartButton.classList.remove('animate-ping-once');
             }, 500);
 
-            // Mostrar una notificación temporal (en lugar de alert())
             showNotification(`"${name}" añadido al carrito.`);
         }
         
@@ -744,7 +952,7 @@
         function showCartModal() {
             const modal = document.getElementById('cart-modal');
             modal.style.display = 'flex';
-            updateCartUI(); // Asegura que el contenido esté actualizado al abrir
+            updateCartUI();
         }
 
         function hideCartModal() {
