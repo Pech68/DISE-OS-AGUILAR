@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diseños Aguilar | Muebles de Lujo en Valledupar</title>
+    <!-- Carga de Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Carga de Iconos (Lucide Icons) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    <style>
+        /* Estilos personalizados para el toque profesional */
+        :root {
+            --color-primary: #5D4037; /* Marrón oscuro para simular madera noble */
+            --color-secondary: #D7CCC8; /* Beige claro/crema */
+            --color-accent: #FFD700; /* Oro/Amarillo para acentos de lujo */
+        }
+        .text-primary { color: var(--color-primary); }
+        .bg-primary { background-color: var(--color-primary); }
+        .text-accent { color: var(--color-accent); }
+        .shadow-luxury {
+            box-shadow: 0 10px 30px -5px rgba(93, 64, 55, 0.3);
+        }
+
+        /* Estilo para la sección Hero, usando una imagen de placeholder elegante */
+        #hero-section {
+            background-image: url('https://placehold.co/1920x800/5D4037/FFFFFF/webp?text=Salas+y+Comedores+Exclusivos');
+            background-size: cover;
+            background-position: center;
+            min-height: 80vh;
+        }
+
+        /* Animación para interacción de palabras/imágenes */
+        .product-card:hover .card-overlay {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Estilo para animación de notificación */
+        @keyframes ping-once {
+            0% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.2); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .animate-ping-once {
+            animation: ping-once 0.5s ease-out;
+        }
+        
+        /* Estilos para el botón de carga del LLM */
+        .loading-button {
+            background-color: #f1f1f1;
+            color: #5D4037;
+            cursor: not-allowed;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body class="font-sans antialiased text-gray-800 bg-gray-50">
+
+    <!-- Navbar -->
+    <header class="sticky top-0 z-50 bg-white shadow-md">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-20">
+            <a href="#hero-section" class="text-2xl font-bold text-primary tracking-widest">DISEÑOS AGUILAR</a>
+            <div class="flex items-center space-x-6">
+                <a href="#catalogos" class="text-gray-600 hover:text-primary transition duration-300">Catálogos</a>
+                <a href="#comprar" class="text-gray-600 hover:text-primary transition duration-300">Comprar</a>
+                <a href="#cotizar" class="text-gray-600 hover:text-primary transition duration-300">
+                    <button class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90 transition duration-300 shadow-lg">Cotizar Ahora</button>
+                </a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section con Interacción de Palabras e Imágenes (Simulada) -->
+    <section id="hero-section" class="relative flex items-center justify-center text-center text-white p-8">
+        <div class="absolute inset-0 bg-black bg-opacity-40"></div>
+        <div class="z-10 max-w-4xl space-y-6">
+            <h1 id="hero-title" class="text-5xl md:text-7xl font-extrabold tracking-tight transition duration-500">
+                Diseños Aguilar: Elegancia en Cada Mueble.
+            </h1>
+            <p id="hero-subtitle" class="text-xl md:text-2xl font-light opacity-90 transition duration-500">
+                Transformando espacios con el arte de la madera y el diseño.
+            </p>
+
+            <!-- Interacción de Palabras con Efecto Visual -->
+            <div class="flex flex-wrap justify-center gap-6 mt-10">
+                <button onmouseover="updateHero('Salas', 'Donde el confort se encuentra con el diseño. Explora nuestros sofás modulares.')"
+                        onmouseout="resetHero()"
+                        class="text-xl font-semibold px-6 py-3 rounded-full border-2 border-white hover:bg-white hover:text-primary transition duration-300">
+                    Salas
+                </button>
+                <button onmouseover="updateHero('Comedores', 'Mesas únicas para momentos inolvidables. La familia se reúne aquí.')"
+                        onmouseout="resetHero()"
+                        class="text-xl font-semibold px-6 py-3 rounded-full border-2 border-white hover:bg-white hover:text-primary transition duration-300">
+                    Comedores
+                </button>
+                <button onmouseover="updateHero('Dormitorios', 'El santuario de tu descanso. Calidad y ergonomía superior.')"
+                        onmouseout="resetHero()"
+                        class="text-xl font-semibold px-6 py-3 rounded-full border-2 border-white hover:bg-white hover:text-primary transition duration-300">
+                    Dormitorios
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Separador -->
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <hr class="border-t-2 border-primary opacity-20">
+    </div>
+
+    <!-- Catálogos (Sección Informativa) -->
+    <section id="catalogos" class="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <h2 class="text-4xl font-bold text-center text-primary mb-12">Nuestros Catálogos de Muebles</h2>
+        <p class="text-center text-gray-600 max-w-3xl mx-auto mb-16">
+            Descubre la colección completa de Diseños Aguilar. Cada pieza está pensada para ofrecer durabilidad, estilo y la máxima comodidad.
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Categoría 1: Salas -->
+            <div class="bg-white rounded-xl shadow-luxury overflow-hidden transform hover:scale-[1.02] transition duration-300 group">
+                <img src="https://placehold.co/600x400/D7CCC8/5D4037/webp?text=Coleccion+Salas" alt="Salas de Diseño" class="w-full h-64 object-cover">
+                <div class="p-6">
+                    <h3 class="text-2xl font-semibold text-primary mb-2">Salas de Estar</h3>
+                    <p class="text-gray-600 mb-4" id="desc-salas">Sofás, sillones reclinables y centros de entretenimiento modulares.</p>
+                    <a href="#" class="text-primary font-medium hover:underline flex items-center mb-3">
+                        Ver Catálogo <i data-lucide="arrow-right" class="w-4 h-4 ml-2"></i>
+                    </a>
+                    <!-- ✨ TTS Asistente -->
+                    <button onclick="speakDescription('desc-salas', 'Kore')" class="w-full py-2 bg-secondary text-primary rounded-lg text-sm hover:bg-opacity-80 transition duration-300 flex items-center justify-center">
+                        <i data-lucide="volume-2" class="w-4 h-4 mr-2"></i> ✨ Escuchar Descripción
+                    </button>
+                </div>
+            </div>
+
+            <!-- Categoría 2: Comedores -->
+            <div class="bg-white rounded-xl shadow-luxury overflow-hidden transform hover:scale-[1.02] transition duration-300 group">
+                <img src="https://placehold.co/600x400/BCAAA4/5D4037/webp?text=Mesas+y+Sillas" alt="Comedores y Mesas" class="w-full h-64 object-cover">
+                <div class="p-6">
+                    <h3 class="text-2xl font-semibold text-primary mb-2">Comedores</h3>
+                    <p class="text-gray-600 mb-4" id="desc-comedores">Mesas en maderas nobles, sillas tapizadas y vitrinas elegantes.</p>
+                    <a href="#" class="text-primary font-medium hover:underline flex items-center mb-3">
+                        Ver Catálogo <i data-lucide="arrow-right" class="w-4 h-4 ml-2"></i>
+                    </a>
+                    <!-- ✨ TTS Asistente -->
+                    <button onclick="speakDescription('desc-comedores', 'Puck')" class="w-full py-2 bg-secondary text-primary rounded-lg text-sm hover:bg-opacity-80 transition duration-300 flex items-center justify-center">
+                        <i data-lucide="volume-2" class="w-4 h-4 mr-2"></i> ✨ Escuchar Descripción
+                    </button>
+                </div>
+            </div>
+
+            <!-- Categoría 3: Dormitorios -->
+            <div class="bg-white rounded-xl shadow-luxury overflow-hidden transform hover:scale-[1.02] transition duration-300 group">
+                <img src="https://placehold.co/600x400/795548/FFFFFF/webp?text=Camas+y+Closets" alt="Camas y Dormitorios" class="w-full h-64 object-cover">
+                <div class="p-6">
+                    <h3 class="text-2xl font-semibold text-primary mb-2">Dormitorios</h3>
+                    <p class="text-gray-600 mb-4" id="desc-dormitorios">Camas a medida, armarios de lujo y cómodas funcionales.</p>
+                    <a href="#" class="text-primary font-medium hover:underline flex items-center mb-3">
+                        Ver Catálogo <i data-lucide="arrow-right" class="w-4 h-4 ml-2"></i>
+                    </a>
+                    <!-- ✨ TTS Asistente -->
+                    <button onclick="speakDescription('desc-dormitorios', 'Charon')" class="w-full py-2 bg-secondary text-primary rounded-lg text-sm hover:bg-opacity-80 transition duration-300 flex items-center justify-center">
+                        <i data-lucide="volume-2" class="w-4 h-4 mr-2"></i> ✨ Escuchar Descripción
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Comprar (Sección de E-commerce Simulado) -->
+    <section id="comprar" class="container mx-auto px-4 sm:px-6 lg:px-8 py-16 bg-gray-100 rounded-xl my-12">
+        <h2 class="text-4xl font-bold text-center text-primary mb-12">Comprar Productos Destacados</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+
+            <!-- Producto 1 -->
+            <div class="product-card bg-white rounded-xl shadow-lg hover:shadow-2xl transition duration-500 overflow-hidden relative">
+                <img src="https://placehold.co/400x300/A1887F/FFFFFF?text=Sof%C3%A1+Modular" alt="Sofá Modular de Lujo" class="w-full h-48 object-cover">
+                <div class="p-4">
+                    <h3 class="font-bold text-primary">Sofá Modular "Ébano"</h3>
+                    <p class="text-gray-500 text-sm">Tapicería de terciopelo.</p>
+                    <p class="text-2xl font-semibold text-accent mt-2">$2.500.000 COP</p>
+                    <button onclick="addToCart('Sofá Ébano', 2500000)" class="w-full mt-3 py-2 bg-primary text-white rounded-lg text-sm hover:bg-opacity-80 transition duration-300 flex items-center justify-center">
+                        <i data-lucide="shopping-cart" class="w-4 h-4 mr-2"></i> Añadir al Carrito
+                    </button>
+                </div>
+            </div>
+
+            <!-- Producto 2 -->
+            <div class="product-card bg-white rounded-xl shadow-lg hover:shadow-2xl transition duration-500 overflow-hidden relative">
+                <img src="https://placehold.co/400x300/8D6E63/FFFFFF?text=Mesa+Comedor" alt="Mesa de Comedor Redonda" class="w-full h-48 object-cover">
+                <div class="p-4">
+                    <h3 class="font-bold text-primary">Mesa de Comedor "Castaño"</h3>
+                    <p class="text-gray-500 text-sm">Madera maciza de 6 puestos.</p>
+                    <p class="text-2xl font-semibold text-accent mt-2">$1.800.000 COP</p>
+                    <button onclick="addToCart('Mesa Castaño', 1800000)" class="w-full mt-3 py-2 bg-primary text-white rounded-lg text-sm hover:bg-opacity-80 transition duration-300 flex items-center justify-center">
+                        <i data-lucide="shopping-cart" class="w-4 h-4 mr-2"></i> Añadir al Carrito
+                    </button>
+                </div>
+            </div>
+
+            <!-- Producto 3 -->
+            <div class="product-card bg-white rounded-xl shadow-lg hover:shadow-2xl transition duration-500 overflow-hidden relative">
+                <img src="https://placehold.co/400x300/6D4C41/FFFFFF?text=Cama+Queen" alt="Cama Queen Size" class="w-full h-48 object-cover">
+                <div class="p-4">
+                    <h3 class="font-bold text-primary">Cama Queen "Majestad"</h3>
+                    <p class="text-gray-500 text-sm">Cabecero tapizado y estructura reforzada.</p>
+                    <p class="text-2xl font-semibold text-accent mt-2">$3.200.000 COP</p>
+                    <button onclick="addToCart('Cama Majestad', 3200000)" class="w-full mt-3 py-2 bg-primary text-white rounded-lg text-sm hover:bg-opacity-80 transition duration-300 flex items-center justify-center">
+                        <i data-lucide="shopping-cart" class="w-4 h-4 mr-2"></i> Añadir al Carrito
+                    </button>
+                </div>
+            </div>
+
+            <!-- Producto 4 -->
+            <div class="product-card bg-white rounded-xl shadow-lg hover:shadow-2xl transition duration-500 overflow-hidden relative">
+                <img src="https://placehold.co/400x300/4E342E/FFFFFF?text=Silla+Auxiliar" alt="Silla Auxiliar de Diseño" class="w-full h-48 object-cover">
+                <div class="p-4">
+                    <h3 class="font-bold text-primary">Silla Auxiliar "Versalles"</h3>
+                    <p class="text-gray-500 text-sm">Detalles en oro y madera.</p>
+                    <p class="text-2xl font-semibold text-accent mt-2">$450.000 COP</p>
+                    <button onclick="addToCart('Silla Versalles', 450000)" class="w-full mt-3 py-2 bg-primary text-white rounded-lg text-sm hover:bg-opacity-80 transition duration-300 flex items-center justify-center">
+                        <i data-lucide="shopping-cart" class="w-4 h-4 mr-2"></i> Añadir al Carrito
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Carrito de Compras (Botón Flotante) -->
+        <div id="cart-button" class="fixed bottom-6 right-6 z-50">
+            <button onclick="showCartModal()" class="flex items-center justify-center w-16 h-16 bg-accent text-primary rounded-full shadow-2xl hover:scale-105 transition duration-300">
+                <i data-lucide="shopping-bag" class="w-6 h-6"></i>
+                <span id="cart-count" class="absolute top-0 right-0 transform translate-x-1/4 -translate-y-1/4 bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">0</span>
+            </button>
+        </div>
+    </section>
+
+    <!-- Cotizar (Formulario Profesional) -->
+    <section id="cotizar" class="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div class="max-w-3xl mx-auto bg-white p-8 md:p-12 rounded-xl shadow-luxury border-t-4 border-primary">
+            <h2 class="text-4xl font-bold text-center text-primary mb-4">Solicita tu Cotización Personalizada</h2>
+            <p class="text-center text-gray-600 mb-8">
+                ¿Buscas algo a la medida? Describe tu proyecto, o usa nuestro generador de ideas ✨.
+            </p>
+            
+            <!-- ✨ Generador de Ideas de Diseño (Gemini API) -->
+            <div class="mb-8 p-6 bg-gray-100 rounded-lg border border-gray-200">
+                <h3 class="text-xl font-semibold text-primary mb-3 flex items-center">
+                    <i data-lucide="sparkles" class="w-5 h-5 mr-2 text-accent"></i> Generador de Ideas de Muebles
+                </h3>
+                <div class="flex flex-col md:flex-row gap-3">
+                    <input type="text" id="design-keyword" placeholder="Ej: Minimalista, Lujoso, Estilo Escandinavo..." 
+                           class="flex-grow px-4 py-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                    <button id="generate-button" onclick="generateDesignIdea()" 
+                            class="px-6 py-3 bg-accent text-primary font-semibold rounded-lg hover:bg-yellow-600 transition duration-300 shadow-md flex items-center justify-center whitespace-nowrap">
+                        <i data-lucide="wand-2" class="w-5 h-5 mr-2"></i> Generar Diseño
+                    </button>
+                </div>
+                <div id="llm-output-container" class="mt-4 hidden p-4 bg-white border border-gray-300 rounded-lg">
+                    <p class="text-sm font-semibold text-primary">Sugerencia de Diseño:</p>
+                    <p id="llm-output" class="text-gray-700 whitespace-pre-wrap"></p>
+                    <button onclick="fillQuoteDetails()" id="apply-llm-output" class="mt-3 text-sm bg-primary text-white px-3 py-1 rounded-full hover:bg-opacity-80 transition duration-300">
+                        Usar en Cotización
+                    </button>
+                </div>
+            </div>
+            <!-- Fin Generador de Ideas -->
+
+
+            <form id="quote-form" onsubmit="handleQuoteSubmit(event)">
+                <div class="space-y-6">
+                    <div>
+                        <label for="name" class="block text-sm font-medium text-gray-700">Nombre Completo</label>
+                        <input type="text" id="name" name="name" required class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                    </div>
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700">Correo Electrónico</label>
+                        <input type="email" id="email" name="email" required class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                    </div>
+                    <div>
+                        <label for="phone" class="block text-sm font-medium text-gray-700">Teléfono de Contacto</label>
+                        <input type="tel" id="phone" name="phone" required class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" placeholder="Ej: 316 5790920">
+                    </div>
+                    <div>
+                        <label for="details" class="block text-sm font-medium text-gray-700">Detalles de la Cotización (Dimensiones, Materiales, Tipo de Mueble)</label>
+                        <textarea id="details" name="details" rows="5" required class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"></textarea>
+                    </div>
+                    <div class="flex justify-center">
+                        <button type="submit" class="w-full md:w-auto px-8 py-3 bg-primary text-white font-semibold rounded-lg hover:bg-opacity-90 transition duration-300 shadow-xl flex items-center justify-center">
+                            <i data-lucide="send" class="w-5 h-5 mr-2"></i> Enviar Solicitud de Cotización
+                        </button>
+                    </div>
+                    <div id="quote-message" class="text-center mt-4 text-green-600 font-medium hidden"></div>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-primary text-white mt-12">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-10">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 border-b border-white border-opacity-30 pb-8 mb-8">
+                <!-- Columna 1: Logo y Misión -->
+                <div>
+                    <h4 class="text-2xl font-bold tracking-widest mb-4">Diseños Aguilar</h4>
+                    <p class="text-sm opacity-80">
+                        Fábrica de muebles de alta calidad, transformando hogares en Valledupar y la región.
+                    </p>
+                </div>
+                <!-- Columna 2: Contacto -->
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Contáctanos</h4>
+                    <ul class="space-y-2 text-sm opacity-80">
+                        <li class="flex items-center"><i data-lucide="map-pin" class="w-4 h-4 mr-2"></i> Cra. 21 #19-55, Valledupar, Cesar.</li>
+                        <li class="flex items-center"><i data-lucide="phone" class="w-4 h-4 mr-2"></i> Teléfono: 316 5790920</li>
+                        <li class="flex items-center"><i data-lucide="mail" class="w-4 h-4 mr-2"></i> info@disenosaguilar.com</li>
+                    </ul>
+                </div>
+                <!-- Columna 3: Enlaces Rápidos -->
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Navegación</h4>
+                    <ul class="space-y-2 text-sm opacity-80">
+                        <li><a href="#catalogos" class="hover:underline">Catálogos</a></li>
+                        <li><a href="#comprar" class="hover:underline">Comprar</a></li>
+                        <li><a href="#cotizar" class="hover:underline">Cotizar</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="text-center text-sm opacity-60">
+                &copy; 2024 Diseños Aguilar. Todos los derechos reservados.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modal para el Carrito de Compras (Simulado) -->
+    <div id="cart-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-[100]">
+        <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-lg transform transition-all duration-300 scale-100">
+            <div class="flex justify-between items-center border-b pb-3 mb-4">
+                <h3 class="text-2xl font-bold text-primary">Tu Carrito de Compras</h3>
+                <button onclick="hideCartModal()" class="text-gray-500 hover:text-red-600"><i data-lucide="x" class="w-6 h-6"></i></button>
+            </div>
+            <div id="cart-items-list" class="max-h-80 overflow-y-auto space-y-4">
+                <p id="empty-cart-message" class="text-gray-500 text-center">El carrito está vacío.</p>
+                <!-- Items se insertarán aquí -->
+            </div>
+            <div class="border-t pt-4 mt-4">
+                <div class="flex justify-between font-bold text-lg mb-4">
+                    <span>Total:</span>
+                    <span id="cart-total-price" class="text-accent">$0 COP</span>
+                </div>
+                <button onclick="simulatePurchase()" class="w-full py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition duration-300">
+                    <i data-lucide="check-circle" class="w-5 h-5 mr-2 inline-block"></i> Finalizar Compra (Simulado)
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Script principal para interactividad, lógica y Gemini API -->
+    <script>
+        // Clave API (se mantendrá vacía para que Canvas la inyecte)
+        const apiKey = ""; 
+        const LLM_MODEL = 'gemini-2.5-flash-preview-05-20';
+        const TTS_MODEL = 'gemini-2.5-flash-preview-tts';
+
+        // Inicializa los iconos de Lucide
+        document.addEventListener('DOMContentLoaded', (event) => {
+            lucide.createIcons();
+            // Llama a resetHero para asegurar que los valores iniciales son correctos
+            resetHero();
+        });
+
+        /*
+        * Utilidades API y Manejo de Errores
+        */
+        const maxRetries = 3;
+        
+        async function fetchWithRetry(url, options, retries = 0) {
+            try {
+                const response = await fetch(url, options);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response;
+            } catch (error) {
+                if (retries < maxRetries) {
+                    const delay = Math.pow(2, retries) * 1000;
+                    // console.log(`Retry ${retries + 1} after ${delay}ms...`);
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    return fetchWithRetry(url, options, retries + 1);
+                } else {
+                    console.error("Fetch failed after multiple retries:", error);
+                    throw error;
+                }
+            }
+        }
+
+        /*
+        * 1. Generador de Ideas de Diseño (LLM) - Cotizar
+        */
+        async function generateDesignIdea() {
+            const keywordInput = document.getElementById('design-keyword');
+            const keyword = keywordInput.value.trim();
+            const outputContainer = document.getElementById('llm-output-container');
+            const outputElement = document.getElementById('llm-output');
+            const generateButton = document.getElementById('generate-button');
+            
+            if (!keyword) {
+                showNotification('Ingresa una palabra clave o estilo de diseño (ej: vintage, moderno, etc.)', 'bg-yellow-500');
+                return;
+            }
+
+            // Cambiar estado a cargando
+            generateButton.disabled = true;
+            generateButton.classList.add('loading-button');
+            generateButton.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 mr-2 animate-spin"></i> Generando Idea...';
+            lucide.createIcons();
+            outputElement.textContent = 'Pensando en el diseño perfecto para ti...';
+            outputContainer.classList.remove('hidden');
+
+            const systemPrompt = "Eres un diseñador de interiores y fabricante de muebles de lujo. Genera una descripción inspiradora para un mueble personalizado basado en el estilo proporcionado. Incluye el tipo de mueble (e.g., sala, comedor), los materiales sugeridos (e.g., madera nogal, tapicería anti-manchas) y un nombre de colección atractivo. El resultado debe ser una descripción concisa y profesional, adecuada para un formulario de cotización. Responde en español.";
+            const userQuery = `Estilo de diseño clave: "${keyword}". Crea una descripción de cotización para un mueble.`;
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${LLM_MODEL}:generateContent?key=${apiKey}`;
+
+            const payload = {
+                contents: [{ parts: [{ text: userQuery }] }],
+                systemInstruction: {
+                    parts: [{ text: systemPrompt }]
+                },
+                config: {
+                    temperature: 0.8
+                }
+            };
+
+            try {
+                const response = await fetchWithRetry(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const result = await response.json();
+                const text = result.candidates?.[0]?.content?.parts?.[0]?.text || "No se pudo generar una idea de diseño. Intenta con otra palabra clave.";
+                
+                outputElement.textContent = text;
+
+            } catch (error) {
+                console.error("Error al llamar a Gemini API para generar diseño:", error);
+                outputElement.textContent = "Lo sentimos, hubo un error al generar la idea. Por favor, inténtalo más tarde.";
+                showNotification('Error al contactar al Generador de Ideas.', 'bg-red-600');
+            } finally {
+                // Restaurar botón
+                generateButton.disabled = false;
+                generateButton.classList.remove('loading-button');
+                generateButton.innerHTML = '<i data-lucide="wand-2" class="w-5 h-5 mr-2"></i> Generar Diseño';
+                lucide.createIcons();
+            }
+        }
+        
+        function fillQuoteDetails() {
+            const llmOutput = document.getElementById('llm-output').textContent;
+            const detailsTextarea = document.getElementById('details');
+            
+            if (llmOutput && llmOutput !== 'Pensando en el diseño perfecto para ti...') {
+                detailsTextarea.value = llmOutput;
+                showNotification('Descripción de diseño copiada al campo de detalles.', 'bg-green-600');
+            } else {
+                showNotification('No hay contenido generado para aplicar.', 'bg-yellow-500');
+            }
+        }
+        
+        /*
+        * 2. Asistente de Catálogo (TTS) - Catálogos
+        */
+        async function speakDescription(elementId, voiceName) {
+            const element = document.getElementById(elementId);
+            const textToSpeak = element.textContent;
+            
+            if (!textToSpeak) return;
+
+            // Simple control para evitar múltiples reproducciones
+            if (window.audioContext && window.audioSource) {
+                window.audioSource.stop();
+                window.audioContext.close();
+                delete window.audioContext;
+                delete window.audioSource;
+            }
+
+            showNotification('Generando audio de descripción. Espera un momento...', 'bg-primary');
+
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${TTS_MODEL}:generateContent?key=${apiKey}`;
+            const prompt = `Describe la siguiente colección con un tono informativo y profesional: "${textToSpeak}"`;
+            
+            const payload = {
+                contents: [{ parts: [{ text: prompt }] }],
+                generationConfig: {
+                    responseModalities: ["AUDIO"],
+                    speechConfig: {
+                        voiceConfig: {
+                            prebuiltVoiceConfig: { voiceName: voiceName }
+                        }
+                    }
+                }
+            };
+
+            try {
+                const response = await fetchWithRetry(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const result = await response.json();
+                const part = result?.candidates?.[0]?.content?.parts?.[0];
+                const audioData = part?.inlineData?.data;
+                const mimeType = part?.inlineData?.mimeType;
+
+                if (audioData && mimeType && mimeType.startsWith("audio/L16")) {
+                    const sampleRateMatch = mimeType.match(/rate=(\d+)/);
+                    const sampleRate = sampleRateMatch ? parseInt(sampleRateMatch[1], 10) : 24000;
+                    
+                    const pcmData = base64ToArrayBuffer(audioData);
+                    const pcm16 = new Int16Array(pcmData);
+                    const wavBlob = pcmToWav(pcm16, sampleRate);
+                    const audioUrl = URL.createObjectURL(wavBlob);
+
+                    const audio = new Audio(audioUrl);
+                    audio.play();
+                    showNotification('Reproduciendo descripción.', 'bg-green-600');
+
+                    audio.onended = () => {
+                        URL.revokeObjectURL(audioUrl); // Limpiar URL
+                    };
+                } else {
+                    throw new Error("Respuesta de audio inválida o incompleta.");
+                }
+                
+            } catch (error) {
+                console.error("Error en TTS API:", error);
+                showNotification('Error al generar el audio. Asegúrate de que el texto sea claro.', 'bg-red-600');
+            }
+        }
+
+        // --- Funciones Auxiliares para TTS ---
+        function base64ToArrayBuffer(base64) {
+            const binaryString = atob(base64);
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            return bytes.buffer;
+        }
+
+        function pcmToWav(pcm16, sampleRate) {
+            const numChannels = 1;
+            const bytesPerSample = 2; // Int16
+            const blockAlign = numChannels * bytesPerSample;
+            const byteRate = sampleRate * blockAlign;
+            const bufferLength = pcm16.length * bytesPerSample;
+
+            const buffer = new ArrayBuffer(44 + bufferLength);
+            const view = new DataView(buffer);
+            
+            // RIFF chunk descriptor
+            writeString(view, 0, 'RIFF');
+            view.setUint32(4, 36 + bufferLength, true);
+            writeString(view, 8, 'WAVE');
+            
+            // FMT sub-chunk
+            writeString(view, 12, 'fmt ');
+            view.setUint32(16, 16, true);          // Subchunk1Size (16 for PCM)
+            view.setUint16(20, 1, true);           // AudioFormat (1 for PCM)
+            view.setUint16(22, numChannels, true); // NumChannels
+            view.setUint32(24, sampleRate, true);  // SampleRate
+            view.setUint32(28, byteRate, true);    // ByteRate
+            view.setUint16(32, blockAlign, true);  // BlockAlign
+            view.setUint16(34, 16, true);          // BitsPerSample (16-bit)
+
+            // Data sub-chunk
+            writeString(view, 36, 'data');
+            view.setUint32(40, bufferLength, true); // Subchunk2Size
+
+            // Escribir datos PCM
+            let offset = 44;
+            for (let i = 0; i < pcm16.length; i++, offset += 2) {
+                view.setInt16(offset, pcm16[i], true);
+            }
+
+            return new Blob([view], { type: 'audio/wav' });
+        }
+
+        function writeString(view, offset, string) {
+            for (let i = 0; i < string.length; i++) {
+                view.setUint8(offset + i, string.charCodeAt(i));
+            }
+        }
+        // --- Fin Funciones Auxiliares ---
+        
+        
+        /*
+        * Lógica para la Interacción de Palabras con Imágenes (Hero Section)
+        */
+        function updateHero(title, subtitle) {
+            const heroTitle = document.getElementById('hero-title');
+            const heroSubtitle = document.getElementById('hero-subtitle');
+            
+            heroTitle.innerHTML = `<span class="text-accent">${title}:</span> ${heroTitle.innerHTML.split(':')[1] || 'Elegancia en Cada Mueble.'}`;
+            heroSubtitle.textContent = subtitle;
+            
+            // Efecto visual: Se podría cambiar el fondo si tuviéramos múltiples imágenes.
+            const heroSection = document.getElementById('hero-section');
+            heroSection.style.backgroundImage = `url('https://placehold.co/1920x800/4E342E/FFFFFF/webp?text=Mobiliario+de+${title}')`;
+        }
+
+        function resetHero() {
+            const heroTitle = document.getElementById('hero-title');
+            const heroSubtitle = document.getElementById('hero-subtitle');
+            
+            heroTitle.innerHTML = 'Diseños Aguilar: Elegancia en Cada Mueble.';
+            heroSubtitle.textContent = 'Transformando espacios con el arte de la madera y el diseño.';
+            
+            const heroSection = document.getElementById('hero-section');
+            heroSection.style.backgroundImage = `url('https://placehold.co/1920x800/5D4037/FFFFFF/webp?text=Salas+y+Comedores+Exclusivos')`;
+        }
+
+        /*
+        * Lógica del Formulario de Cotización (No LLM related)
+        */
+        function handleQuoteSubmit(event) {
+            event.preventDefault();
+            const form = event.target;
+            const messageDiv = document.getElementById('quote-message');
+            
+            const quoteData = {
+                name: form.name.value,
+                email: form.email.value,
+                phone: form.phone.value,
+                details: form.details.value,
+                timestamp: new Date().toISOString()
+            };
+
+            // Simulación de envío de datos
+            console.log('--- SOLICITUD DE COTIZACIÓN ENVIADA ---');
+            console.log(quoteData);
+            console.log('--------------------------------------');
+
+            // Mostrar mensaje de éxito y resetear formulario
+            messageDiv.textContent = '¡Cotización enviada con éxito! Te contactaremos pronto.';
+            messageDiv.classList.remove('hidden');
+            form.reset();
+
+            // Ocultar mensaje después de 5 segundos
+            setTimeout(() => {
+                messageDiv.classList.add('hidden');
+            }, 5000);
+        }
+
+        /*
+        * Lógica de Carrito de Compras (E-commerce Simulado)
+        */
+        let cart = [];
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('es-CO', {
+                style: 'currency',
+                currency: 'COP',
+                minimumFractionDigits: 0
+            }).format(amount);
+        }
+
+        function updateCartUI() {
+            const cartList = document.getElementById('cart-items-list');
+            const cartTotalElement = document.getElementById('cart-total-price');
+            const cartCountElement = document.getElementById('cart-count');
+            const emptyMessage = document.getElementById('empty-cart-message');
+
+            // FIX: Se añade verificación para asegurar que los elementos existen antes de manipularlos
+            if (!cartList || !cartTotalElement || !cartCountElement || !emptyMessage) {
+                console.error("Error al cargar elementos del carrito. Intentando de nuevo...");
+                return; 
+            }
+
+            cartList.innerHTML = '';
+            
+            if (cart.length === 0) {
+                emptyMessage.classList.remove('hidden');
+                cartTotalElement.textContent = formatCurrency(0);
+                cartCountElement.textContent = 0;
+                return;
+            }
+            emptyMessage.classList.add('hidden');
+
+            let total = 0;
+            
+            cart.forEach((item, index) => {
+                total += item.price;
+                const itemElement = document.createElement('div');
+                itemElement.className = 'flex items-center justify-between border-b pb-2';
+                itemElement.innerHTML = `
+                    <div class="flex-grow">
+                        <p class="font-semibold text-gray-800">${item.name}</p>
+                        <p class="text-sm text-gray-500">${formatCurrency(item.price)}</p>
+                    </div>
+                    <button onclick="removeFromCart(${index})" class="text-red-500 hover:text-red-700 ml-4 transition duration-300">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+                `;
+                cartList.appendChild(itemElement);
+            });
+
+            cartTotalElement.textContent = formatCurrency(total);
+            cartCountElement.textContent = cart.length;
+            lucide.createIcons(); // Vuelve a renderizar iconos en el modal
+        }
+
+        function addToCart(name, price) {
+            cart.push({ name, price });
+            updateCartUI();
+            
+            // Pequeña animación para indicar que se añadió
+            const cartButton = document.getElementById('cart-button').querySelector('button');
+            cartButton.classList.add('animate-ping-once');
+            setTimeout(() => {
+                cartButton.classList.remove('animate-ping-once');
+            }, 500);
+
+            // Mostrar una notificación temporal (en lugar de alert())
+            showNotification(`"${name}" añadido al carrito.`);
+        }
+        
+        function removeFromCart(index) {
+            const removedItem = cart[index].name;
+            cart.splice(index, 1);
+            updateCartUI();
+            showNotification(`"${removedItem}" eliminado del carrito.`, 'bg-red-500');
+        }
+
+        function showCartModal() {
+            const modal = document.getElementById('cart-modal');
+            modal.style.display = 'flex';
+            updateCartUI(); // Asegura que el contenido esté actualizado al abrir
+        }
+
+        function hideCartModal() {
+            document.getElementById('cart-modal').style.display = 'none';
+        }
+        
+        function simulatePurchase() {
+            if (cart.length === 0) {
+                showNotification('El carrito está vacío. ¡Añade productos antes de comprar!', 'bg-yellow-500');
+                return;
+            }
+            
+            console.log('--- COMPRA FINALIZADA (Simulación) ---');
+            console.log('Total a pagar:', formatCurrency(cart.reduce((sum, item) => sum + item.price, 0)));
+            console.log('Productos comprados:', cart);
+            console.log('------------------------------------');
+
+            showNotification('¡Compra realizada con éxito! Recibirás la factura por correo.', 'bg-green-600');
+            cart = []; // Vaciar carrito
+            hideCartModal();
+        }
+
+        /*
+        * Lógica de Notificación Temporal (Reemplazo de alert)
+        */
+        function showNotification(message, bgColor = 'bg-primary') {
+            const existingNotification = document.getElementById('app-notification');
+            if (existingNotification) existingNotification.remove();
+
+            const notification = document.createElement('div');
+            notification.id = 'app-notification';
+            notification.className = `fixed top-4 left-1/2 transform -translate-x-1/2 p-4 rounded-lg text-white shadow-xl transition-opacity duration-300 opacity-0 ${bgColor}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            // Mostrar la notificación
+            setTimeout(() => {
+                notification.style.opacity = '1';
+            }, 50);
+
+            // Ocultar y remover la notificación
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                setTimeout(() => notification.remove(), 300);
+            }, 4000);
+        }
+
+    </script>
+</body>
+</html>
